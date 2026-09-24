@@ -1,0 +1,44 @@
+// Trimmed local copy of the official GTFS-realtime.proto (see
+// gtfs-realtime.proto in this same folder for the full upstream spec).
+// Field numbers are preserved exactly from the original so decoding a real
+// feed still works correctly - unused fields/messages (VehiclePosition,
+// Alert, Shape, Stop, TripModifications, TripProperties, VehicleDescriptor,
+// ModifiedTripSelector, StopTimeProperties, delay/uncertainty, etc.) are
+// simply omitted, and protobuf decoders skip unknown field numbers on the
+// wire by design. This keeps the generated nanopb code small enough to fit
+// the ESP32-S3's default app partition (the full spec's generated code did
+// not - see Public Transport/project.md).
+syntax = "proto2";
+package transit_realtime;
+
+message FeedMessage {
+  required FeedHeader header = 1;
+  repeated FeedEntity entity = 2;
+}
+
+message FeedHeader {
+}
+
+message FeedEntity {
+  optional TripUpdate trip_update = 3;
+}
+
+message TripUpdate {
+  required TripDescriptor trip = 1;
+
+  message StopTimeEvent {
+    optional int64 time = 2;
+  }
+
+  message StopTimeUpdate {
+    optional string stop_id = 4;
+    optional StopTimeEvent arrival = 2;
+    optional StopTimeEvent departure = 3;
+  }
+
+  repeated StopTimeUpdate stop_time_update = 2;
+}
+
+message TripDescriptor {
+  optional string route_id = 5;
+}
